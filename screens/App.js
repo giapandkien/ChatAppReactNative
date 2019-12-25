@@ -1,9 +1,6 @@
 import React from 'react';
 import {SafeAreaView, StatusBar} from 'react-native';
-
-import {} from 'react-native/Libraries/NewAppScreen';
-
-import LoginScreen from './screens/LoginScreen';
+import LoginScreen from './auth/LoginScreen';
 
 const App = () => {
   return (

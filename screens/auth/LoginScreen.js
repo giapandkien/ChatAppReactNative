@@ -42,6 +42,11 @@ const styles = EStyleSheet.create({
 EStyleSheet.build({});
 
 class LoginScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
   render() {
     return (
       <View style={styles.root}>
