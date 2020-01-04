@@ -1,13 +1,17 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, StatusBar} from 'react-native';
-import ListChatEle from '../../components/listChat/ListChatEle';
+import {View, Text} from 'react-native';
+import {screenHeight, screenWidth} from '../../src/utils/screenSize';
+import PersonCard from '../../components/findFriend/personCard';
+import LinearGradient from 'react-native-linear-gradient';
+import Swiper from 'react-native-deck-swiper';
 
 const styles = EStyleSheet.create({
   root: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#FFF',
+    height: '100%',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -46,25 +50,22 @@ const friend = [
   },
 ];
 
-class ListFriend extends Component {
+class FindFriend extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
 
   render() {
-    const {navigate} = this.props.navigation;
     return (
-      <ScrollView>
-        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-        <View style={styles.root}>
-          {friend.map((i, key) => (
-            <ListChatEle key={key} data={i} onPress={() => navigate('Chat')} />
-          ))}
-        </View>
-      </ScrollView>
+      <LinearGradient
+        colors={['#fff', '#f5f6fa', '#f1f2f6', '#ecf0f1']}
+        style={styles.root}>
+        {/* <Swiper cards={friend} /> */}
+        <PersonCard />
+      </LinearGradient>
     );
   }
 }
 
-export default ListFriend;
+export default FindFriend;

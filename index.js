@@ -4,12 +4,15 @@ import {Provider as StoreProvider} from 'react-redux';
 import {AppRegistry} from 'react-native';
 import App from './screens/App';
 import {name as appName} from './app.json';
+import {initStore as store} from './src/store/index';
 
 export default function Main() {
   return (
-    <PaperProvider>
-      <App />
-    </PaperProvider>
+    <StoreProvider store={store}>
+      <PaperProvider>
+        <App />
+      </PaperProvider>
+    </StoreProvider>
   );
 }
 
