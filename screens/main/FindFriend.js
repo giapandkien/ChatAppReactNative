@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text} from 'react-native';
+import {View, Text, StatusBar} from 'react-native';
 import {screenHeight, screenWidth} from '../../src/utils/screenSize';
 import PersonCard from '../../components/findFriend/personCard';
 import LinearGradient from 'react-native-linear-gradient';
@@ -61,6 +61,7 @@ class FindFriend extends Component {
       <LinearGradient
         colors={['#fff', '#f5f6fa', '#f1f2f6', '#ecf0f1']}
         style={styles.root}>
+        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
         {/* <Swiper cards={friend} /> */}
         <PersonCard />
       </LinearGradient>

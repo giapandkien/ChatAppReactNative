@@ -1,14 +1,18 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, Dimensions, ToastAndroid} from 'react-native';
+import {View, Text, ScrollView, ToastAndroid, AsyncStorage} from 'react-native';
 import {TextInput, Button} from 'react-native-paper';
-import firebaseApp from '../../src/connectFirebase/firebase.config';
 import {connect} from 'react-redux';
-
-const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
-
-const userRef = firebaseApp.firestore().collection('users');
+import {screenHeight, screenWidth} from '../../src/utils/screenSize';
+import {setLoadingFull} from '../../src/actions/common.actions';
+import {updateInfo} from '../../src/actions/createProfile.actions';
+import {setAuth} from '../../src/actions/auth.actions';
+import {
+  userRef,
+  countryRef,
+  cityRef,
+  authRef,
+} from '../../src/connectFirebase/firebase.connections';
 
 const styles = EStyleSheet.create({
   root: {
@@ -92,36 +96,117 @@ class SignUpScreen extends Component {
     });
   };
 
+  getData = async () => {
+    const {dispatch} = this.props;
+    const {navigate} = this.props.navigation;
+    try {
+      dispatch(setLoadingFull());
+      let responseCountry = [];
+      let responseCity = [];
+      let listCountry = [];
+      await countryRef.get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          responseCountry.push(doc.data());
+        });
+      });
+      await cityRef.get().then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          responseCity.push(doc.data());
+        });
+      });
+
+      listCountry = responseCountry.map(i => {
+        let cities = [];
+        responseCity.forEach(ele => {
+          if (ele.country === i.countryName) {
+            cities.push(ele.cityName);
+          }
+        });
+        return {
+          ...i,
+          cities,
+        };
+      });
+      dispatch(updateInfo({value: listCountry, type: 'listCountry'}));
+      dispatch(updateInfo({value: listCountry[0].cities, type: 'listCity'}));
+      dispatch(
+        updateInfo({
+          value: listCountry[0].countryName,
+          type: 'countrySelected',
+        }),
+      );
+      dispatch(
+        updateInfo({value: listCountry[0].cities[0], type: 'citySelected'}),
+      );
+      dispatch(setLoadingFull());
+      navigate('CreateProfile');
+    } catch (error) {
+      dispatch(setLoadingFull());
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    }
+  };
+
+  _storeData = async (email, password) => {
+    try {
+      await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('password', password);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   handleSignUp = async () => {
     const {username, email, password, reenterPassword} = this.state;
-    const {navigate} = this.props.navigation;
-    if (password === reenterPassword) {
-      try {
-        await firebaseApp
-          .auth()
-          .createUserWithEmailAndPassword(email, password)
-          .then(() => {
-            userRef
-              .add({
+    const {dispatch} = this.props;
+    if (
+      username === '' ||
+      email === '' ||
+      password === '' ||
+      reenterPassword === ''
+    ) {
+      ToastAndroid.show('Fill all text field', ToastAndroid.SHORT);
+    } else {
+      if (password.length >= 6) {
+        if (password === reenterPassword) {
+          try {
+            dispatch(setLoadingFull());
+            await authRef.createUserWithEmailAndPassword(email, password);
+            this._storeData(email, password);
+            const user = authRef.currentUser;
+            await userRef
+              .doc(user.uid)
+              .set({
                 username: username,
-                email: email,
               })
               .then(() => {
+                dispatch(
+                  setAuth({
+                    uid: user.uid,
+                    email: email,
+                  }),
+                );
+                dispatch(setLoadingFull());
                 ToastAndroid.show('Create successfull', ToastAndroid.SHORT);
-                navigate('Step1');
+                this.getData();
               });
-          });
-      } catch (error) {
-        ToastAndroid.show(error, ToastAndroid.SHORT);
+          } catch (error) {
+            dispatch(setLoadingFull());
+            console.log(error);
+            ToastAndroid.show(error.message, ToastAndroid.SHORT);
+          }
+        } else {
+          ToastAndroid.show('Password does not match', ToastAndroid.SHORT);
+        }
+      } else {
+        ToastAndroid.show(
+          'Password must be longer or equal to 6 characters',
+          ToastAndroid.SHORT,
+        );
       }
-    } else {
-      ToastAndroid.show('Password does not match', ToastAndroid.SHORT);
     }
   };
 
   render() {
-    const {navigate} = this.props.navigation;
-    console.log(this.props);
     const {username, email, password, reenterPassword} = this.state;
     return (
       <ScrollView>
@@ -149,6 +234,7 @@ class SignUpScreen extends Component {
                 value={password}
                 mode="outlined"
                 label="Password"
+                placeholder="Type more than 6 character"
                 secureTextEntry={true}
                 onChangeText={this.handleChangePassword}
               />
@@ -157,6 +243,7 @@ class SignUpScreen extends Component {
                 value={reenterPassword}
                 mode="outlined"
                 label="Re-enter password"
+                placeholder="Type more than 6 character"
                 secureTextEntry={true}
                 onChangeText={this.handleChangeReenterPassword}
               />
@@ -175,8 +262,10 @@ class SignUpScreen extends Component {
 }
 
 function mapStateToProps(state) {
-  const {signIn} = state;
-  return {signIn};
+  const {createProfile} = state;
+  return {
+    createProfile,
+  };
 }
 
 export default connect(mapStateToProps)(SignUpScreen);

@@ -1,33 +1,62 @@
 import React from 'react';
+import {View} from 'react-native';
 import {createAppContainer, createSwitchNavigator} from 'react-navigation';
 import {createMaterialBottomTabNavigator} from 'react-navigation-material-bottom-tabs';
 import {createStackNavigator} from 'react-navigation-stack';
 import LoginScreen from './auth/LoginScreen';
 import SignUpScreen from './auth/SignUpScreen';
-import Step1SignUp from './auth/signUp/Steps/Step1';
-import Step2SignUp from './auth/signUp/Steps/Step2';
-import Step3SignUp from './auth/signUp/Steps/Step3';
+import Step1SignUp from './auth/createProfile/Steps/Step1';
+import Step2SignUp from './auth/createProfile/Steps/Step2';
+import Step3SignUp from './auth/createProfile/Steps/Step3';
 import ListFriend from './main/ListFriend';
 import ChatScreen from './main/ChatScreen';
 import FindFriend from './main/FindFriend';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
 import ProfileScreen from './profile/ProfileScreen';
 import InvitationScreen from './main/InvitationScreen';
+import LoadingFull from '../components/common/loadingFull';
+import LoadingDialog from '../components/common/loadingDialog';
+import {YellowBox} from 'react-native';
+YellowBox.ignoreWarnings(['Remote debugger']);
+
+const CreateProfileNavigationOptions = {
+  headerTitle: 'Create your profile:',
+  headerStyle: {
+    elevation: 0,
+  },
+  headerTitleStyle: {
+    fontFamily: 'Roboto-Bold',
+  },
+};
 
 const CreateProfileNavigator = createStackNavigator(
   {
-    Step1: {screen: Step1SignUp},
-    Step2: {screen: Step2SignUp},
-    Step3: {screen: Step3SignUp},
+    Step1: {
+      screen: Step1SignUp,
+      navigationOptions: ({navigation}) => {
+        return CreateProfileNavigationOptions;
+      },
+    },
+    Step2: {
+      screen: Step2SignUp,
+      navigationOptions: ({navigation}) => {
+        return CreateProfileNavigationOptions;
+      },
+    },
+    Step3: {
+      screen: Step3SignUp,
+      navigationOptions: ({navigation}) => {
+        return CreateProfileNavigationOptions;
+      },
+    },
   },
-  {},
+  {initialRouteName: 'Step1'},
 );
 
 const AuthNavigator = createStackNavigator(
   {
     Login: {screen: LoginScreen},
     SignUp: {screen: SignUpScreen},
-    CreateProfile: {screen: CreateProfileNavigator},
   },
   {
     initialRouteName: 'Login',
@@ -103,7 +132,7 @@ const MainTapBottomNavigator = createMaterialBottomTabNavigator(
     },
   },
   {
-    initialRouteName: 'ChatNavigator',
+    initialRouteName: 'FindFriend',
     activeColor: '#6c5ce7',
     shifting: true,
     barStyle: {
@@ -115,6 +144,7 @@ const MainTapBottomNavigator = createMaterialBottomTabNavigator(
 const AppNavigator = createStackNavigator(
   {
     AuthNavigator: {screen: AuthNavigator},
+    CreateProfile: {screen: CreateProfileNavigator},
     MainTapBottomNavigator: {screen: MainTapBottomNavigator},
   },
   {
@@ -124,6 +154,20 @@ const AppNavigator = createStackNavigator(
 );
 
 const Navigation = createAppContainer(AppNavigator);
-const App = () => <Navigation theme="light" />;
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <View style={{flex: 1}}>
+        <LoadingFull />
+        <LoadingDialog />
+        <Navigation theme="light" />
+      </View>
+    );
+  }
+}
 
 export default App;

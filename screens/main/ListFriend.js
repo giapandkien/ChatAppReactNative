@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, StatusBar} from 'react-native';
+import {View, ScrollView, StatusBar} from 'react-native';
 import ListChatEle from '../../components/listChat/ListChatEle';
 
 const styles = EStyleSheet.create({

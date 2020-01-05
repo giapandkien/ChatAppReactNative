@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, Dimensions} from 'react-native';
+import {View, Text, ScrollView, ToastAndroid, AsyncStorage} from 'react-native';
 import {TextInput, Button} from 'react-native-paper';
-import firebaseApp from '../../src/connectFirebase/firebase.config';
-
-const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
+import {connect} from 'react-redux';
+import {screenHeight, screenWidth} from '../../src/utils/screenSize';
+import {setLoadingFull} from '../../src/actions/common.actions';
+import {setAuth} from '../../src/actions/auth.actions';
+import {userRef, authRef} from '../../src/connectFirebase/firebase.connections';
 
 const styles = EStyleSheet.create({
   root: {
@@ -63,22 +64,64 @@ class LoginScreen extends Component {
     };
   }
 
-  componentDidMount() {
-    firebaseApp.auth().onAuthStateChanged(user => {
-      this.props.navigation.navigate(
-        user ? 'MainTapBottomNavigator' : 'AuthNavigator',
-      );
-    });
+  async componentDidMount() {
+    const {dispatch} = this.props;
+    const {navigate} = this.props.navigation;
+    try {
+      const email = await AsyncStorage.getItem('email');
+      const password = await AsyncStorage.getItem('password');
+      if (email !== null && password !== null) {
+        this.login(email, password);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  login = () => {
-    const {email, password} = this.state;
+  loadData = uid => {
+    const {dispatch} = this.props;
+    try {
+      dispatch(setLoadingFull());
+      dispatch(setLoadingFull());
+    } catch (error) {
+      dispatch(setLoadingFull());
+      console.log(error);
+    }
+  };
+
+  _storeData = async (email, password) => {
+    try {
+      await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('password', password);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  login = async (email, password) => {
+    const {dispatch} = this.props;
     const {navigate} = this.props.navigation;
-    firebaseApp
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then(() => navigate('ListFriend'))
-      .catch(error => console.log(error));
+    try {
+      dispatch(setLoadingFull());
+      await authRef
+        .signInWithEmailAndPassword(email, password)
+        .then(response => {
+          this._storeData(email, password);
+          dispatch(
+            setAuth({
+              uid: response.user.uid,
+              email: response.user.email,
+            }),
+          );
+          ToastAndroid.show('Login succesful!', ToastAndroid.SHORT);
+          dispatch(setLoadingFull());
+          navigate('MainTapBottomNavigator');
+        });
+    } catch (error) {
+      dispatch(setLoadingFull());
+      console.log(error);
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    }
   };
 
   signUp = () => {
@@ -122,7 +165,10 @@ class LoginScreen extends Component {
                 secureTextEntry={true}
                 onChangeText={this.handleChangePassword}
               />
-              <Button mode="contained" color="#6c5ce7" onPress={this.login}>
+              <Button
+                mode="contained"
+                color="#6c5ce7"
+                onPress={() => this.login(email, password)}>
                 Login
               </Button>
               <Button mode="contained" color="#6c5ce7" onPress={this.signUp}>
@@ -136,4 +182,4 @@ class LoginScreen extends Component {
   }
 }
 
-export default LoginScreen;
+export default connect()(LoginScreen);
