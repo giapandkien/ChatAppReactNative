@@ -16,24 +16,29 @@ const styles = EStyleSheet.create({
   },
   img: {
     width: 0.8 * screenWidth,
-    height: 0.5 * screenHeight,
+    height: 0.52 * screenHeight,
     borderRadius: 10,
     marginBottom: 20,
   },
   name: {
     fontFamily: 'Roboto-Black',
-    fontSize: 24,
+    fontSize: 25,
     color: '#2d3436',
+  },
+  age: {
+    fontFamily: 'Roboto-Medium',
+    fontSize: 14,
   },
   description: {
     color: '#95a5a6',
     fontFamily: 'Roboto-Regular',
-    fontSize: 11,
+    fontSize: 14,
   },
   btnBox: {
     flexDirection: 'row',
     width: '100%',
     marginTop: 10,
+    justifyContent: 'center',
   },
   iconBtn: {
     backgroundColor: '#fff',
@@ -45,7 +50,6 @@ const styles = EStyleSheet.create({
     justifyContent: 'center',
     marginLeft: 15,
     marginRight: 15,
-    marginTop: 10,
     marginBottom: 10,
   },
   textPercent: {
@@ -55,7 +59,7 @@ const styles = EStyleSheet.create({
   },
   matchPercent: {
     position: 'absolute',
-    bottom: 145,
+    bottom: 165,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -65,6 +69,25 @@ const styles = EStyleSheet.create({
     paddingTop: 5,
     paddingBottom: 5,
   },
+  likeBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  closeBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  nameBox: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  icon: {marginRight: 10},
 });
 
 EStyleSheet.build({});
@@ -72,38 +95,66 @@ EStyleSheet.build({});
 class PersonCard extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
   }
 
   render() {
+    const {data} = this.props.person;
+    const {skip, invite} = this.props;
     return (
       <View style={styles.root}>
         <Image
           source={{
-            uri:
-              'https://firebasestorage.googleapis.com/v0/b/chatapp-22591.appspot.com/o/ha-anh-tuan.jpg?alt=media&token=64bcde7b-7ebf-4e97-9989-ca9888e4174a',
+            uri: data.img,
           }}
           style={styles.img}
         />
-        <Text style={styles.name}>Ha Anh Tuan</Text>
-        <Text style={styles.description}>
-          Singer, Thang tu la loi noi doi cua em
-        </Text>
+        <View style={styles.nameBox}>
+          {data.sex === 'female' ? (
+            <Icon
+              name="venus"
+              type="font-awesome"
+              size={20}
+              color="#ff7675"
+              containerStyle={styles.icon}
+            />
+          ) : (
+            <Icon
+              name="mars"
+              type="font-awesome"
+              size={20}
+              color="#0984e3"
+              containerStyle={styles.icon}
+            />
+          )}
+          <Icon />
+          <Text style={styles.name}>{data.username}</Text>
+        </View>
+        <Text style={styles.age}>{' (' + data.age + ' years old)'}</Text>
+        <Text style={styles.description}>{data.description}</Text>
         <LinearGradient
           start={{x: 0, y: 0}}
           end={{x: 1, y: 0}}
-          colors={['#5c63e7', '#6c5ce7']}
+          colors={['#be2edd', '#6c5ce7']}
           style={styles.matchPercent}>
           <Icon name="heart" type="font-awesome" color="#fff" size={15} />
           <Text style={styles.textPercent}>95% Match!</Text>
         </LinearGradient>
         <View style={styles.btnBox}>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Icon name="close" type="material" color="#e74c3c" size={25} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Icon name="heart" type="font-awesome" color="#6c5ce7" size={20} />
-          </TouchableOpacity>
+          <View style={styles.closeBox}>
+            <TouchableOpacity onPress={skip} style={styles.iconBtn}>
+              <Icon name="close" type="material" color="#e74c3c" size={25} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.likeBox}>
+            <TouchableOpacity onPress={invite} style={styles.iconBtn}>
+              <Icon
+                name="heart"
+                type="font-awesome"
+                color="#6c5ce7"
+                size={20}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );

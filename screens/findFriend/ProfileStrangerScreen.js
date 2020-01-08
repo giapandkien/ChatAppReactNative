@@ -9,24 +9,20 @@ import {setAuth} from '../../src/actions/auth.actions';
 import {setDefault} from '../../src/actions/createProfile.actions';
 import {setLoadingFull} from '../../src/actions/common.actions';
 import {screenHeight} from '../../src/utils/screenSize';
-import LoadingWithoutModal from '../../components/common/loadingWithoutModal';
 
 const styles = EStyleSheet.create({
   root: {flex: 1, position: 'relative', alignItems: 'center'},
   nameBox: {
     position: 'absolute',
-    top: 0.54 * screenHeight,
+    top: 0.45 * screenHeight,
     width: '80%',
-    height: 0.15 * screenHeight,
+    height: 0.12 * screenHeight,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
     zIndex: 3,
     borderRadius: 5,
     elevation: 5,
-  },
-  age: {
-    fontFamily: 'Roboto-Medium',
   },
   name: {
     fontFamily: 'Roboto-Black',
@@ -36,7 +32,7 @@ const styles = EStyleSheet.create({
   description: {fontFamily: 'Roboto-Light', color: '#2d3436', fontSize: 15},
   img: {
     width: '100%',
-    height: 0.61 * screenHeight,
+    height: 0.5 * screenHeight,
     marginBottom: 0.1 * screenHeight,
   },
   nameRow: {
@@ -69,20 +65,21 @@ class ProfileScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      age: null,
-      city: null,
-      country: null,
-      description: null,
-      img: null,
-      sex: null,
-      username: null,
-      isLoading: true,
+      age: '',
+      city: '',
+      country: '',
+      description: '',
+      img: '',
+      sex: '',
+      username: '',
     };
   }
 
   async componentDidMount() {
+    const {dispatch} = this.props;
     const {uid} = this.props.auth;
     try {
+      dispatch(setLoadingFull());
       await userRef
         .doc(uid)
         .get()
@@ -99,13 +96,9 @@ class ProfileScreen extends Component {
             });
           }
         });
-      this.setState({
-        isLoading: false,
-      });
+      dispatch(setLoadingFull());
     } catch (error) {
-      this.setState({
-        isLoading: false,
-      });
+      dispatch(setLoadingFull());
       ToastAndroid.show(error, ToastAndroid.SHORT);
     }
   }
@@ -115,17 +108,12 @@ class ProfileScreen extends Component {
     const {navigate} = this.props.navigation;
     try {
       dispatch(setLoadingFull());
-      await AsyncStorage.removeItem('email');
-      await AsyncStorage.removeItem('password');
-      dispatch(
-        setAuth({
-          uid: '',
-          email: '',
-        }),
-      );
-      dispatch(setDefault());
       await authRef.signOut();
       navigate('AuthNavigator');
+      await AsyncStorage.removeItem('email');
+      await AsyncStorage.removeItem('password');
+      dispatch(setAuth({uid: '', email: ''}));
+      dispatch(setDefault());
       dispatch(setLoadingFull());
     } catch (error) {
       dispatch(setLoadingFull());
@@ -134,21 +122,10 @@ class ProfileScreen extends Component {
   };
 
   render() {
-    const {
-      img,
-      username,
-      description,
-      age,
-      city,
-      country,
-      sex,
-      isLoading,
-    } = this.state;
-    return isLoading ? (
-      <LoadingWithoutModal />
-    ) : (
+    const {img, username, description, age, city, country, sex} = this.state;
+    return (
       <View style={styles.root}>
-        {img !== undefined && <Image style={styles.img} source={{uri: img}} />}
+        {img !== '' && <Image style={styles.img} source={{uri: img}} />}
         <View style={styles.nameBox}>
           <View style={styles.nameRow}>
             {sex === 'female' ? (
@@ -168,15 +145,14 @@ class ProfileScreen extends Component {
                 containerStyle={styles.icon}
               />
             )}
-            {username !== undefined && (
-              <Text style={styles.name}>{username}</Text>
+            {username !== '' && (
+              <Text style={styles.name}>
+                {username + ' (' + age + ' years old)'}
+              </Text>
             )}
           </View>
-          {age !== undefined && (
-            <Text style={styles.age}>{' (' + age + ' years old)'}</Text>
-          )}
           <Text style={styles.description}>
-            {description !== undefined && description}
+            {description !== '' && description}
           </Text>
         </View>
         <View style={styles.inforBox}>
@@ -188,14 +164,11 @@ class ProfileScreen extends Component {
               color="#e74c3c"
               containerStyle={styles.icon}
             />
-            {city !== undefined && country !== undefined && (
+            {city !== '' && country !== '' && (
               <Text style={styles.description}>{city + ', ' + country}</Text>
             )}
           </View>
         </View>
-        <Button onPress={this.logOut} mode="text" color="#6c5ce7">
-          Sign out
-        </Button>
       </View>
     );
   }

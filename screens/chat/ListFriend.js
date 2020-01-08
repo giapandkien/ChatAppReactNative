@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import {View, ScrollView, StatusBar} from 'react-native';
 import ListChatEle from '../../components/listChat/ListChatEle';
+import {chatRoomRef} from '../../src/connectFirebase/firebase.connections';
+import {connect} from 'react-redux';
 
 const styles = EStyleSheet.create({
   root: {
@@ -49,17 +51,51 @@ const friend = [
 class ListFriend extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      listChatRoom: [],
+    };
   }
 
-  render() {
+  async componentDidMount() {
+    const {auth} = this.props;
+    try {
+      let listChatRoom = [];
+      await chatRoomRef.get().then(docs => {
+        if (docs !== undefined) {
+          docs.forEach(i => {
+            if (i.data().joiners.indexOf(auth.uid) >= 0) {
+              listChatRoom.push(i.id);
+            }
+          });
+        }
+        this.setState({
+          listChatRoom: listChatRoom,
+        });
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  goToChatRoom = (name, img, roomID) => {
     const {navigate} = this.props.navigation;
+    navigate('Chat', {name: name, img: img, roomID: roomID});
+  };
+
+  render() {
+    const {listChatRoom} = this.state;
     return (
       <ScrollView>
         <StatusBar backgroundColor="#fff" barStyle="dark-content" />
         <View style={styles.root}>
-          {friend.map((i, key) => (
-            <ListChatEle key={key} data={i} onPress={() => navigate('Chat')} />
+          {listChatRoom.map((i, key) => (
+            <ListChatEle
+              key={key}
+              roomID={i}
+              onPress={(name, img, roomID) =>
+                this.goToChatRoom(name, img, roomID)
+              }
+            />
           ))}
         </View>
       </ScrollView>
@@ -67,4 +103,9 @@ class ListFriend extends Component {
   }
 }
 
-export default ListFriend;
+function mapStateToProps(state) {
+  const {auth} = state;
+  return {auth};
+}
+
+export default connect(mapStateToProps)(ListFriend);

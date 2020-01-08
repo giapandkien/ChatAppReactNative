@@ -5,7 +5,7 @@ import {TextInput, Button} from 'react-native-paper';
 import {connect} from 'react-redux';
 import {screenHeight, screenWidth} from '../../src/utils/screenSize';
 import {setLoadingFull} from '../../src/actions/common.actions';
-import {setAuth} from '../../src/actions/auth.actions';
+import {setAuth, setInfor} from '../../src/actions/auth.actions';
 import {userRef, authRef} from '../../src/connectFirebase/firebase.connections';
 
 const styles = EStyleSheet.create({
@@ -65,8 +65,6 @@ class LoginScreen extends Component {
   }
 
   async componentDidMount() {
-    const {dispatch} = this.props;
-    const {navigate} = this.props.navigation;
     try {
       const email = await AsyncStorage.getItem('email');
       const password = await AsyncStorage.getItem('password');

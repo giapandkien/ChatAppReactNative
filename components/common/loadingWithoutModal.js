@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Modal, ActivityIndicator} from 'react-native';
+import {View, ActivityIndicator} from 'react-native';
 
 const styles = EStyleSheet.create({
   root: {
@@ -16,21 +16,18 @@ const styles = EStyleSheet.create({
 
 EStyleSheet.build({});
 
-class Loading extends Component {
+class LoadingWithoutModal extends Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const {visible} = this.props;
     return (
-      <Modal transparent={true} animationType="fade" visible={visible}>
-        <View style={styles.root}>
-          <ActivityIndicator size="large" animating={true} color="#6c5ce7" />
-        </View>
-      </Modal>
+      <View style={styles.root}>
+        <ActivityIndicator size="large" animating={true} color="#6c5ce7" />
+      </View>
     );
   }
 }
 
-export default Loading;
+export default LoadingWithoutModal;

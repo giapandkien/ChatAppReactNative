@@ -6,7 +6,7 @@ const styles = EStyleSheet.create({});
 
 EStyleSheet.build({});
 
-class ChatScreen extends Component {
+class CustomSwiper extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -21,4 +21,4 @@ class ChatScreen extends Component {
   }
 }
 
-export default ChatScreen;
+export default CustomSwiper;

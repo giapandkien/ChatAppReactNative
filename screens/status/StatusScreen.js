@@ -6,7 +6,7 @@ const styles = EStyleSheet.create({});
 
 EStyleSheet.build({});
 
-class InvitationScreen extends Component {
+class StatusScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -21,4 +21,4 @@ class InvitationScreen extends Component {
   }
 }
 
-export default InvitationScreen;
+export default StatusScreen;
