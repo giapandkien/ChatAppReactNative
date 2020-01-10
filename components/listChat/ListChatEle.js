@@ -78,7 +78,7 @@ class ListChatEle extends Component {
   }
 
   componentWillUnmount() {
-    this.callRealtimeLastMess = null;
+    this.callRealtimeLastMess();
   }
 
   getRoomData = async id => {

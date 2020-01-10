@@ -5,8 +5,8 @@ import {TextInput, Button} from 'react-native-paper';
 import {connect} from 'react-redux';
 import {screenHeight, screenWidth} from '../../src/utils/screenSize';
 import {setLoadingFull} from '../../src/actions/common.actions';
-import {setAuth, setInfor} from '../../src/actions/auth.actions';
-import {userRef, authRef} from '../../src/connectFirebase/firebase.connections';
+import {setAuth} from '../../src/actions/auth.actions';
+import {authRef} from '../../src/connectFirebase/firebase.connections';
 
 const styles = EStyleSheet.create({
   root: {

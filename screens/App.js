@@ -117,7 +117,7 @@ const MainTapBottomNavigator = createMaterialBottomTabNavigator(
     },
   },
   {
-    initialRouteName: 'ListChatRoom',
+    initialRouteName: 'Status',
     activeColor: '#6c5ce7',
     shifting: true,
     barStyle: {

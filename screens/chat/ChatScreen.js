@@ -1,7 +1,14 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import {connect} from 'react-redux';
-import {View, ScrollView, TextInput, ToastAndroid} from 'react-native';
+import {
+  View,
+  ScrollView,
+  TextInput,
+  ToastAndroid,
+  KeyboardAvoidingView,
+  Keyboard,
+} from 'react-native';
 import Message from '../../components/common/message';
 import {Icon} from 'react-native-elements';
 import {
@@ -10,9 +17,6 @@ import {
 } from '../../src/connectFirebase/firebase.connections';
 
 const styles = EStyleSheet.create({
-  scrollview: {
-    flexDirection: 'column-reverse',
-  },
   root: {
     flex: 1,
     width: '100%',
@@ -43,10 +47,18 @@ const styles = EStyleSheet.create({
   inputBox: {
     flex: 9,
   },
-  showContent: {
-    minHeight: 500,
+  contentScrollView: {
+    flexGrow: 1,
     flexDirection: 'column',
+    paddingTop: 5,
+    paddingBottom: 5,
     justifyContent: 'flex-end',
+  },
+  scrollViewKeyboardShow: {
+    height: 280,
+  },
+  scrollViewKeyboardHide: {
+    height: 514,
   },
 });
 
@@ -58,37 +70,54 @@ class ChatScreen extends Component {
     this.state = {
       message: '',
       listMess: [],
+      isKeyboardShow: false,
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const {navigation} = this.props;
     const roomID = navigation.getParam('roomID');
-    let listMess = [];
-    try {
-      this.getAllMessages = messageRef.onSnapshot(messages => {
-        if (messages !== undefined) {
-          messages.docs.forEach(ele => {
-            if (ele !== undefined && ele.data().roomID === roomID) {
-              listMess.push(ele.data());
-            }
-          });
-        }
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      this.keyboardDidShow,
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      this.keyboardDidHide,
+    );
+    this.getMess = messageRef.onSnapshot(messages => {
+      if (messages !== undefined && messages !== null) {
+        let listMess = [];
+        messages.forEach(ele => {
+          if (ele.data().roomID === roomID) {
+            listMess.push(ele.data());
+          }
+        });
         this.setState({
           listMess: listMess,
         });
-      });
-    } catch (error) {
-      console.log(error);
-      ToastAndroid.show(
-        'Error from server, please try again',
-        ToastAndroid.SHORT,
-      );
-    }
+      }
+    });
   }
 
+  keyboardDidShow = () => {
+    this.setState({
+      isKeyboardShow: true,
+    });
+    this.scrollView.scrollToEnd({animated: true});
+  };
+
+  keyboardDidHide = () => {
+    this.setState({
+      isKeyboardShow: false,
+    });
+    this.scrollView.scrollToEnd({animated: true});
+  };
+
   componentWillUnmount() {
-    this.getAllMessages = null;
+    this.getMess();
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
   }
 
   sendMess = async () => {
@@ -99,17 +128,20 @@ class ChatScreen extends Component {
     const roomID = navigation.getParam('roomID');
     if (message !== '') {
       try {
+        this.setState({
+          message: '',
+        });
         await messageRef.doc(messName).set({
           content: message,
           timeSend: timeSend,
           senderID: auth.uid,
           roomID: roomID,
         });
-        ToastAndroid.show('Sent!', ToastAndroid.SHORT);
-        this.scrollView.scrollToEnd({animated: true});
-        this.setState({
-          message: '',
+        await chatRoomRef.doc(roomID).update({
+          lastMessage: message,
         });
+        this.scrollView.scrollToEnd({animated: true});
+        ToastAndroid.show('Sent!', ToastAndroid.SHORT);
       } catch (error) {
         ToastAndroid.show(
           'Error from server, please try again',
@@ -121,16 +153,28 @@ class ChatScreen extends Component {
   };
 
   render() {
-    const {message, listMess} = this.state;
+    const {message, listMess, isKeyboardShow} = this.state;
     const {auth} = this.props;
     return (
       <View style={styles.root}>
-        <ScrollView
-          ref={ref => (this.scrollView = ref)}
-          onContentSizeChange={(contentWidth, contentHeight) => {
-            this.scrollView.scrollToEnd({animated: true});
-          }}>
-          <View style={styles.showContent}>
+        <KeyboardAvoidingView
+          style={{
+            flex: 1,
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+          }}
+          enabled>
+          <ScrollView
+            ref={ref => (this.scrollView = ref)}
+            onContentSizeChange={(contentWidth, contentHeight) => {
+              this.scrollView.scrollToEnd({animated: true});
+            }}
+            style={
+              isKeyboardShow
+                ? styles.scrollViewKeyboardShow
+                : styles.scrollViewKeyboardHide
+            }
+            contentContainerStyle={styles.contentScrollView}>
             {listMess.map((i, key) => (
               <Message
                 key={key}
@@ -138,8 +182,8 @@ class ChatScreen extends Component {
                 isMine={i.senderID === auth.uid}
               />
             ))}
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
         <View style={styles.textBox}>
           <View style={styles.inputBox}>
             <TextInput
