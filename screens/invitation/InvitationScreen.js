@@ -8,6 +8,7 @@ import {
   chatRoomRef,
 } from '../../src/connectFirebase/firebase.connections';
 import InvitationElement from '../../components/invitation/element';
+import LoadingWithoutModal from '../../components/common/loadingWithoutModal';
 
 const styles = EStyleSheet.create({});
 
@@ -18,37 +19,39 @@ class InvitationScreen extends Component {
     super(props);
     this.state = {
       listInvitations: [],
+      isLoading: true,
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const {auth} = this.props;
-    let listInvitationsID = null;
-    let listInvitations = [];
-    try {
-      await userRef
-        .doc(auth.uid)
-        .get()
-        .then(doc => {
-          listInvitationsID = doc.data().invitations;
-        });
-      await userRef.get().then(docs => {
-        docs.forEach(i => {
-          if (listInvitationsID.indexOf(i.id) >= 0) {
-            const invitator = {
-              id: i.id,
-              data: i.data(),
-            };
-            listInvitations.push(invitator);
-          }
-        });
-      });
+    this.getFriendInvitation = userRef.doc(auth.uid).onSnapshot(async doc => {
+      let listInvitations = [];
+      if (doc.data().invitations !== undefined) {
+        if (doc.data().invitations !== undefined) {
+          const listInvitationsID = doc.data().invitations;
+          await userRef.get().then(docs => {
+            docs.forEach(i => {
+              if (listInvitationsID.indexOf(i.id) >= 0) {
+                const invitator = {
+                  id: i.id,
+                  data: i.data(),
+                };
+                listInvitations.push(invitator);
+              }
+            });
+          });
+        }
+      }
       this.setState({
         listInvitations: listInvitations,
+        isLoading: false,
       });
-    } catch (error) {
-      console.log(error);
-    }
+    });
+  }
+
+  componentWillUnmount() {
+    this.getFriendInvitation();
   }
 
   acceptFriend = async id => {
@@ -62,6 +65,7 @@ class InvitationScreen extends Component {
       });
       await userRef.doc(id).update({
         personsInvited: firebase.firestore.FieldValue.arrayRemove(auth.uid),
+        friends: firebase.firestore.FieldValue.arrayUnion(auth.uid),
       });
       const roomID = new Date().getTime();
       const joiners = [id, auth.uid];
@@ -79,8 +83,11 @@ class InvitationScreen extends Component {
   };
 
   render() {
-    const {listInvitations} = this.state;
-    return (
+    const {listInvitations, isLoading} = this.state;
+    console.log(listInvitations);
+    return isLoading ? (
+      <LoadingWithoutModal />
+    ) : (
       <View>
         {listInvitations.map((i, key) => (
           <InvitationElement

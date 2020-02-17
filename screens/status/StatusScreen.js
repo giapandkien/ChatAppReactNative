@@ -8,13 +8,15 @@ import {
   userRef,
 } from '../../src/connectFirebase/firebase.connections';
 import {connect} from 'react-redux';
-import StatusElement from '../../components/status/elememt';
+import StatusElement from '../../components/status/element';
+import LoadingWithoutModal from '../../components/common/loadingWithoutModal';
 
 const styles = EStyleSheet.create({
   root: {
     flex: 1,
     width: '100%',
     backgroundColor: '#e9ebee',
+    alignItems: 'center',
   },
   inputBox: {flex: 1, padding: 10},
   input: {
@@ -42,6 +44,14 @@ const styles = EStyleSheet.create({
   avatarBox: {
     padding: 10,
   },
+  scrollView: {
+    width: '95%',
+  },
+  contentStyleScrollView: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 EStyleSheet.build({});
@@ -54,26 +64,41 @@ class StatusScreen extends Component {
       img: '',
       height: 0,
       listStatus: [],
+      isLoading: true,
     };
   }
 
   async componentDidMount() {
     const {auth} = this.props;
-    let listStatus = [];
+    let listFriend = [];
     await userRef
       .doc(auth.uid)
       .get()
-      .then(doc => this.setState({img: doc.data().img}))
-      .catch(error => console.log(error));
-    await statusesRef
-      .get()
-      .then(docs => {
-        docs.forEach(doc => {
-          listStatus.push({id: doc.id, ...doc.data()});
-        });
-        this.setState({listStatus: listStatus});
+      .then(doc => {
+        if (doc.data().friends !== undefined) {
+          listFriend = doc.data().friends;
+        }
+        this.setState({img: doc.data().img});
       })
       .catch(error => console.log(error));
+    this.getStatus = statusesRef.onSnapshot(docs => {
+      let listStatus = [];
+      docs.forEach(doc => {
+        if (doc !== undefined) {
+          if (
+            listFriend.indexOf(doc.data().posterID) >= 0 ||
+            doc.data().posterID === auth.uid
+          ) {
+            listStatus.push({id: doc.id, ...doc.data()});
+          }
+        }
+      });
+      this.setState({listStatus: listStatus, isLoading: false});
+    });
+  }
+
+  componentWillUnmount() {
+    this.getStatus();
   }
 
   postStatus = async () => {
@@ -95,8 +120,10 @@ class StatusScreen extends Component {
   };
 
   render() {
-    const {statusContent, img, height, listStatus} = this.state;
-    return (
+    const {statusContent, img, height, listStatus, isLoading} = this.state;
+    return isLoading ? (
+      <LoadingWithoutModal />
+    ) : (
       <View style={styles.root}>
         <View style={styles.postStatusBox}>
           <View style={styles.boxInputAndAvatar}>
@@ -118,7 +145,7 @@ class StatusScreen extends Component {
                 onContentSizeChange={event => {
                   this.setState({height: event.nativeEvent.contentSize.height});
                 }}
-                selectionColor="#000"
+                selectionColor="#6c5ce7"
                 placeholder="What are you thinking ?"
                 onChangeText={text => this.setState({statusContent: text})}
                 value={statusContent}
@@ -136,7 +163,9 @@ class StatusScreen extends Component {
             </View>
           )}
         </View>
-        <ScrollView>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.contentContainerStyle}>
           {listStatus.map((i, key) => (
             <StatusElement key={key} data={i} />
           ))}

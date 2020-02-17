@@ -117,7 +117,7 @@ const MainTapBottomNavigator = createMaterialBottomTabNavigator(
     },
   },
   {
-    initialRouteName: 'Status',
+    initialRouteName: 'FindFriend',
     activeColor: '#6c5ce7',
     shifting: true,
     barStyle: {

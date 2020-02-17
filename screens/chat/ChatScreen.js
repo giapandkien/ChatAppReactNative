@@ -15,6 +15,7 @@ import {
   chatRoomRef,
   messageRef,
 } from '../../src/connectFirebase/firebase.connections';
+import {setLoadingFull} from '../../src/actions/common.actions';
 
 const styles = EStyleSheet.create({
   root: {

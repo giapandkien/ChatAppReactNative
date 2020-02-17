@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ToastAndroid, Image, AsyncStorage} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import {View, Text, ToastAndroid, Image} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {Button} from 'react-native-paper';
 import {connect} from 'react-redux';

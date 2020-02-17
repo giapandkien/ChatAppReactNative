@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, ToastAndroid, AsyncStorage} from 'react-native';
+import {AsyncStorage} from '@react-native-community/async-storage';
+import {View, Text, ScrollView, ToastAndroid} from 'react-native';
 import {TextInput, Button} from 'react-native-paper';
 import {connect} from 'react-redux';
 import {screenHeight, screenWidth} from '../../src/utils/screenSize';
@@ -37,7 +38,7 @@ const styles = EStyleSheet.create({
     position: 'absolute',
     zIndex: 2,
   },
-  loginForm: {
+  siginForm: {
     backgroundColor: '#fff',
     width: '80%',
     height: '55%',
@@ -49,13 +50,18 @@ const styles = EStyleSheet.create({
   title: {
     fontFamily: 'Roboto-Bold',
     color: '#fff',
-    fontSize: 20,
+    fontSize: 30,
+    marginBottom: 15,
   },
   textField: {
     fontFamily: 'Roboto-Light',
     width: '90%',
     backgroundColor: '#fff',
     color: '#636e72',
+  },
+  btnBox: {
+    paddingTop: 10,
+    paddingBottom: 5,
   },
 });
 
@@ -214,7 +220,7 @@ class SignUpScreen extends Component {
           <View style={styles.background} />
           <View style={styles.element}>
             <Text style={styles.title}>Sign Up</Text>
-            <View style={styles.loginForm}>
+            <View style={styles.siginForm}>
               <TextInput
                 style={styles.textField}
                 value={username}
@@ -247,12 +253,14 @@ class SignUpScreen extends Component {
                 secureTextEntry={true}
                 onChangeText={this.handleChangeReenterPassword}
               />
-              <Button
-                mode="contained"
-                color="#6c5ce7"
-                onPress={this.handleSignUp}>
-                Sign Up
-              </Button>
+              <View style={styles.btnBox}>
+                <Button
+                  mode="contained"
+                  color="#6c5ce7"
+                  onPress={this.handleSignUp}>
+                  Sign Up
+                </Button>
+              </View>
             </View>
           </View>
         </View>

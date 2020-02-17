@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import {View, Text, ScrollView, ToastAndroid, AsyncStorage} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import {View, Text, ScrollView, ToastAndroid} from 'react-native';
 import {TextInput, Button} from 'react-native-paper';
 import {connect} from 'react-redux';
 import {screenHeight, screenWidth} from '../../src/utils/screenSize';
@@ -12,7 +13,7 @@ const styles = EStyleSheet.create({
   root: {
     flex: 1,
     width: screenWidth,
-    height: screenHeight,
+    height: screenHeight - 25,
     position: 'relative',
     backgroundColor: '#fff',
   },
@@ -34,7 +35,7 @@ const styles = EStyleSheet.create({
   loginForm: {
     backgroundColor: '#fff',
     width: '70%',
-    height: '50%',
+    height: '45%',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
@@ -43,7 +44,8 @@ const styles = EStyleSheet.create({
   title: {
     fontFamily: 'Roboto-Bold',
     color: '#fff',
-    fontSize: 20,
+    fontSize: 30,
+    marginBottom: 15,
   },
   textField: {
     fontFamily: 'Roboto-Light',
@@ -51,6 +53,13 @@ const styles = EStyleSheet.create({
     backgroundColor: '#fff',
     color: '#636e72',
   },
+  btnBox: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  btn: {marginTop: 7},
 });
 
 EStyleSheet.build({});
@@ -163,15 +172,22 @@ class LoginScreen extends Component {
                 secureTextEntry={true}
                 onChangeText={this.handleChangePassword}
               />
-              <Button
-                mode="contained"
-                color="#6c5ce7"
-                onPress={() => this.login(email, password)}>
-                Login
-              </Button>
-              <Button mode="contained" color="#6c5ce7" onPress={this.signUp}>
-                Sign Up
-              </Button>
+              <View style={styles.btnBox}>
+                <Button
+                  mode="contained"
+                  color="#6c5ce7"
+                  style={styles.btn}
+                  onPress={() => this.login(email, password)}>
+                  Login
+                </Button>
+                <Button
+                  style={styles.btn}
+                  mode="text"
+                  color="#6c5ce7"
+                  onPress={this.signUp}>
+                  Sign Up
+                </Button>
+              </View>
             </View>
           </View>
         </View>

@@ -230,7 +230,6 @@ class FindFriend extends Component {
       <LinearGradient
         colors={['#fff', '#f5f6fa', '#f1f2f6', '#ecf0f1']}
         style={styles.root}>
-        <StatusBar backgroundColor="#fff" barStyle="dark-content" />
         {persons.length > 1 && currentIndex < persons.length && (
           <PersonCard
             person={persons[currentIndex]}
